@@ -24,14 +24,14 @@ When building against conda, you can typically use the environment variables `$C
 
 ### Using Pixi (recommended)
 
-This project ships a `pixi.toml` for fully reproducible, isolated builds via [pixi](https://github.com/prefix-dev/pixi/). All examples/tests execute inside the Pixi environment; no PYTHONPATH tweaks required.
+This project ships a `pixi.toml` for fully reproducible, isolated builds via [pixi](https://github.com/prefix-dev/pixi/). All examples/tests execute inside the Pixi environment; 
 
 1. Install pixi (see official docs) or via shell script:
 	```bash
 	curl -fsSL https://pixi.sh/install.sh | bash
 	# then restart your shell so that `pixi` is on PATH
 	```
-2. Create the environment and build:
+2. Configure & build (configure is cached automatically – reruns are no-ops unless CMakeCache.txt is missing):
 	```bash
 	pixi run build
 	```
@@ -45,14 +45,16 @@ This project ships a `pixi.toml` for fully reproducible, isolated builds via [pi
 	pixi run example-talos
 	pixi run example-ur5
 	```
-5. Install the library (into the pixi environment prefix):
+5. Install the library (cached with a timestamp; only reinstalls when reconfigured):
 	```bash
 	pixi run install
 	```
 
 Extra tasks:
 
+* `configure` – Run CMake configure step (idempotent).
 * `build-debug` – Build a Debug configuration.
+* `install` – Installs only when sources reconfigured (timestamp cache).
 * `format-check` – Run Ruff on the python sources.
 * `clean` – Remove the CMake build directory.
 

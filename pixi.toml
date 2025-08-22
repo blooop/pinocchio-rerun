@@ -24,16 +24,20 @@ ruff = "*"
 [pypi-dependencies]
 rerun-sdk = ">=0.23,<0.24"
 
+[tasks.configure]
+cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -G Ninja"
+inputs = ["CMakeLists.txt"]
+outputs = ["build/CMakeCache.txt"]
+
 [tasks.build]
-cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja && cmake --build build -j"
-
-
-[tasks.build-debug]
-cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja && cmake --build build -j"
+cmd = "cmake --build build -j"
+depends-on = ["configure"]
+inputs = ["CMakeLists.txt", "src/**/*.cpp", "src/**/*.hpp", "include/**/*.hpp", "**/*.c", "**/*.h"]
+outputs = ["build/**/*"]
 
 [tasks.install]
-# Install directly into the active pixi environment prefix so the Python package & library are importable without PYTHONPATH tweaks.
-cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -G Ninja && cmake --build build -j && cmake --install build"
+cmd = "cmake --build build -j && (test build/install.stamp -nt build/CMakeCache.txt || (cmake --install build && date > build/install.stamp))"
+depends-on = ["configure"]
 
 [tasks.test]
 cmd = "ctest --test-dir build --output-on-failure"
@@ -41,6 +45,10 @@ depends-on = ["build"]
 
 [tasks.format-check]
 cmd = "ruff check ."
+
+[tasks.check]
+cmd = "echo 'All checks passed'"
+depends-on = ["test", "format-check"]
 
 [tasks.example-solo8]
 cmd = "python examples/solo8.py"
