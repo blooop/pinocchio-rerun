@@ -10,7 +10,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CXX_DISABLE_WERROR True)
 
-cmake_policy(SET CMP0135 OLD)
+# Modern policies
+if(POLICY CMP0135)
+  cmake_policy(SET CMP0135 NEW)
+endif()
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
 
 include(CMakeDependentOption)
 include(cmake-module/base.cmake)
