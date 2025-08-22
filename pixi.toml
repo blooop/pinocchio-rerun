@@ -15,7 +15,7 @@ pinocchio = "*"
 assimp = "*"
 eigenpy = "*"
 example-robot-data = "*"
-librerun-sdk = "==0.23.4"
+librerun-sdk = "==0.24.1"
 fmt = "10.*"
 gtest = "*"
 pip = "*"
@@ -23,7 +23,7 @@ ruff = "*"
 
 # Optional PyPI (none for now)
 [pypi-dependencies]
-rerun-sdk = ">=0.23,<0.24"
+rerun-sdk = ">=0.24,<0.25"
 
 [tasks.configure]
 cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -G Ninja"

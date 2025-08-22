@@ -130,7 +130,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libprotobuf-6.31.1-h9ef548d_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libqdldl-0.1.8-h3f2d84a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libre2-11-2025.07.22-h7b12aa8_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/librerun-sdk-0.23.4-hf1dd1d2_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/librerun-sdk-0.24.1-hf860c1a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libsanitizer-14.3.0-hd08acf3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libscotch-7.0.8-int64_h1cd4a87_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libsdformat14-14.8.0-h153a79d_0.conda
@@ -190,7 +190,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/77/06/bb80f5f86020c4551da315d78b3ab75e8228f89f0162f2c3a819e407941a/attrs-25.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f2/2f/d7675ecae6c43e9f12aa8d58b6012683b20b6edfbdac7abcb4e6af7a3784/pillow-11.3.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/74/dc/035d54638fc5d2971cbf1e987ccd45f1091c83bcf747281cf6cc25e72c88/pyarrow-21.0.0-cp311-cp311-manylinux_2_28_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/13/5c/5c194619bbdc9545832f50bf94634fc9f548cf8f08eada76446dffce8d8d/rerun_sdk-0.23.4-cp39-abi3-manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/f2/2a/1bfdf86646bac8290a18f2997ec1afb316841f181f39e46686d0eb6f0012/rerun_sdk-0.24.1-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b5/00/d631e67a838026495268c2f6884f3711a15a9a2a96cd244fdaea53b823fb/typing_extensions-4.14.1-py3-none-any.whl
 packages:
 - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -1929,21 +1929,21 @@ packages:
   purls: []
   size: 210939
   timestamp: 1753295040247
-- conda: https://conda.anaconda.org/conda-forge/linux-64/librerun-sdk-0.23.4-hf1dd1d2_1.conda
-  sha256: 9b1ddf6f97b7b3cc3b8d5dd8eede158a8fff4a0b2ddc553f21f4adeab156e39a
-  md5: 18befbe5ecdb37924442b14953d5b337
+- conda: https://conda.anaconda.org/conda-forge/linux-64/librerun-sdk-0.24.1-hf860c1a_0.conda
+  sha256: 1020c5202171a54d48f1cb39b6ccb1dccfc91bc27dc9550672fba2f97734951a
+  md5: 521d07aae685e4c9a9b49015426cfc12
   depends:
   - __glibc >=2.17,<3.0.a0
   - libarrow >=21.0.0,<21.1.0a0
   - libgcc >=14
   - libstdcxx >=14
   constrains:
+  - rerun-sdk 0.24.1
   - __glibc >=2.17
-  - rerun-sdk 0.23.4
   license: MIT OR Apache-2.0
   purls: []
-  size: 9300073
-  timestamp: 1753453496269
+  size: 10285968
+  timestamp: 1755692879781
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libsanitizer-14.3.0-hd08acf3_4.conda
   sha256: 9d28a094f14bef4b96446534414bd20c104bbc2f557cc76ecbc9343389b87e5c
   md5: a42368edbd3a672bad21c1fe8d307dce
@@ -2501,10 +2501,10 @@ packages:
   purls: []
   size: 282480
   timestamp: 1740379431762
-- pypi: https://files.pythonhosted.org/packages/13/5c/5c194619bbdc9545832f50bf94634fc9f548cf8f08eada76446dffce8d8d/rerun_sdk-0.23.4-cp39-abi3-manylinux_2_28_x86_64.whl
+- pypi: https://files.pythonhosted.org/packages/f2/2a/1bfdf86646bac8290a18f2997ec1afb316841f181f39e46686d0eb6f0012/rerun_sdk-0.24.1-cp39-abi3-manylinux_2_28_x86_64.whl
   name: rerun-sdk
-  version: 0.23.4
-  sha256: 229b5f12a4f6499e2575ace3a9bbc3d164245a65224789d7e3ebc5656b01538d
+  version: 0.24.1
+  sha256: bff6772bb0219798dfb40fd95858db2942ad5c68ec278a6ac73cacab6436cea4
   requires_dist:
   - attrs>=23.1.0
   - numpy>=2
@@ -2512,7 +2512,10 @@ packages:
   - pyarrow>=18.0.0
   - typing-extensions>=4.5
   - pytest==7.1.2 ; extra == 'tests'
-  - rerun-notebook==0.23.4 ; extra == 'notebook'
+  - rerun-notebook==0.24.1 ; extra == 'notebook'
+  - datafusion==47.0.0 ; extra == 'datafusion'
+  - notebook ; extra == 'all'
+  - datafusion ; extra == 'all'
   requires_python: '>=3.9'
 - conda: https://conda.anaconda.org/conda-forge/linux-64/rhash-1.4.6-hb9d3cd8_1.conda
   sha256: d5c73079c1dd2c2a313c3bfd81c73dbd066b7eb08d213778c8bff520091ae894
