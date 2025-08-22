@@ -6,15 +6,9 @@ This is a renderer project for Pinocchio based on [rerun](https://github.com/rer
 
 ## Quickstart
 
-This project requires [Pinocchio](https://github.com/stack-of-tasks/pinocchio) and [Assimp](https://github.com/assimp/assimp) (Pinocchio and HPP-FCL would suffice).
+All required dependencies (Pinocchio, Assimp, HPP-FCL/coal, EigenPy, example-robot-data, Rerun C++ & Python SDKs, etc.) are resolved automatically via the provided Pixi environment. No manual conda/pip installs are needed.
 
-The Rerun viewer needs to be installed for visualizations to work. Follow their [Getting Started](https://github.com/rerun-io/rerun/tree/main#getting-started) to see how to install it.
-
-Moreover, this requires the [Rerun C++ SDK](https://www.rerun.io/docs/getting-started/quick-start/cpp). It can be installed from conda-forge as follows:
-
-```bash
-conda install -c conda-forge librerun-sdk
-```
+To view logs you also need the standalone Rerun viewer binary. If it's not on your PATH you can install it separately (see the Rerun [Getting Started](https://github.com/rerun-io/rerun/tree/main#getting-started)). The examples will still run headless and record if the viewer is unavailable.
 
 ### Compiling from source
 
@@ -27,3 +21,39 @@ cmake --build . --target install
 ```
 
 When building against conda, you can typically use the environment variables `$CONDA_PREFIX` as your prefix.
+
+### Using Pixi (recommended)
+
+This project ships a `pixi.toml` for fully reproducible, isolated builds via [pixi](https://github.com/prefix-dev/pixi/). All examples/tests execute inside the Pixi environment; no PYTHONPATH tweaks required.
+
+1. Install pixi (see official docs) or via shell script:
+	```bash
+	curl -fsSL https://pixi.sh/install.sh | bash
+	# then restart your shell so that `pixi` is on PATH
+	```
+2. Create the environment and build:
+	```bash
+	pixi run build
+	```
+3. Run tests:
+	```bash
+	pixi run test
+	```
+4. Run examples (each will attempt to spawn/connect to a Rerun viewer):
+	```bash
+	pixi run example-solo8
+	pixi run example-talos
+	pixi run example-ur5
+	```
+5. Install the library (into the pixi environment prefix):
+	```bash
+	pixi run install
+	```
+
+Extra tasks:
+
+* `build-debug` – Build a Debug configuration.
+* `format-check` – Run Ruff on the python sources.
+* `clean` – Remove the CMake build directory.
+
+All dependencies (Pinocchio, Assimp, Rerun SDK, etc.) are pulled from `conda-forge` automatically.

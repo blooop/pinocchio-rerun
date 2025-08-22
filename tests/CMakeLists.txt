@@ -1,5 +1,6 @@
 find_package(example-robot-data REQUIRED)
 find_package(GTest REQUIRED)
+include(GoogleTest)
 
 enable_testing()
 

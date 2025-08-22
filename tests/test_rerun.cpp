@@ -9,8 +9,7 @@ TEST(RerunTests, TestRerun) {
   // Create a new `RecordingStream` which sends data over TCP to the viewer
   // process.
   const auto rec = rerun::RecordingStream("rerun_example_cpp");
-  // Try to spawn a new viewer instance.
-  rec.spawn().exit_on_failure();
+  rec.spawn(); // ignore failure
 
   // Create some data using the `grid` utility function.
   auto points = grid3d<rerun::Position3D, float>(-10.f, 10.f, 10);

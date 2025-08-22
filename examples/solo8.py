@@ -12,7 +12,6 @@ rr.loadViewerModel()
 assert rr.initialized
 q0 = pin.neutral(model)
 rr.display(q0)
-rr.display()
 
 
 def displayRandomConfiguration():

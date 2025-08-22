@@ -1,0 +1,59 @@
+[project]
+name = "pinocchio-rerun"
+version = "0.1.0"
+description = "Pinocchio visualization via Rerun"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = "3.11.*"
+cmake = ">=3.26"
+ninja = "*"
+compilers = "*"
+pinocchio = "*"
+assimp = "*"
+eigenpy = "*"
+example-robot-data = "*"
+librerun-sdk = "==0.23.4"
+fmt = "10.*"
+gtest = "*"
+pip = "*"
+ruff = "*"
+
+# Optional PyPI (none for now)
+[pypi-dependencies]
+rerun-sdk = ">=0.23,<0.24"
+
+[tasks.build]
+cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja && cmake --build build -j"
+
+
+[tasks.build-debug]
+cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja && cmake --build build -j"
+
+[tasks.install]
+# Install directly into the active pixi environment prefix so the Python package & library are importable without PYTHONPATH tweaks.
+cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -G Ninja && cmake --build build -j && cmake --install build"
+
+[tasks.test]
+cmd = "ctest --test-dir build --output-on-failure"
+depends-on = ["build"]
+
+[tasks.format-check]
+cmd = "ruff check ."
+
+[tasks.example-solo8]
+cmd = "python examples/solo8.py"
+depends-on = ["install"]
+
+[tasks.example-talos]
+cmd = "python examples/talos.py"
+depends-on = ["install"]
+
+[tasks.example-ur5]
+cmd = "python examples/ur5.py"
+depends-on = ["install"]
+
+[tasks.clean]
+cmd = "rm -rf build"
+

@@ -21,12 +21,9 @@ TEST(LoadMesh, mammoth) {
 }
 
 TEST(LoadMesh, mammoth_rerun) {
-
   mesh = loadMesh(MAMMOTH_FILE);
-
   const rerun::RecordingStream rec("mammoth_example_cpp");
-  rec.spawn().exit_on_failure();
-
+  rec.spawn(); // Ignore failure; don't make test fail if viewer missing.
   rerun::Mesh3D rmesh = meshDescriptionToRerun(std::move(mesh));
   rec.log("mammoth_mesh", std::move(rmesh));
 }

@@ -12,7 +12,9 @@ RerunVisualizer::RerunVisualizer(const pinocchio::Model &model,
     : BaseVisualizer(model, geomModel, nullptr), stream(appID, recID),
       m_prefix("pinocchio/" + model.name), m_initialized(false),
       m_recordingID(recID) {
-  stream.spawn().exit_on_failure();
+  // Try to spawn a viewer, but don't fail hard if unavailable.
+  auto err = stream.spawn();
+  (void)err; // ignore error; tests/examples can still proceed without a viewer.
   stream.set_time_seconds("stable_time", 0.0);
 }
 

@@ -28,6 +28,7 @@ TEST(LoadRobotTest, UR3_visualizer) {
 
   fmt::print("Model: {}\n", robot.model.name);
   pinrerun::RerunVisualizer rr(robot.model, robot.vizModel);
+  rr.stream.spawn();
   rr.stream.set_time_seconds("stable_time", 0.0);
   rr.initViewer();
 
@@ -40,6 +41,7 @@ TEST(LoadRobotTest, UR5_visualizer) {
 
   fmt::print("Model: {}\n", robot.model.name);
   pinrerun::RerunVisualizer rr(robot.model, robot.vizModel);
+  rr.stream.spawn();
   rr.stream.set_time_seconds("stable_time", 0.0);
   rr.initViewer();
 

@@ -18,6 +18,13 @@ include(cmake-module/ide.cmake)
 COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
 
+# Default to a local install prefix inside the build tree when not specified to avoid permission errors
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Install path prefix." FORCE)
+endif()
+
+include(CTest) # enables BUILD_TESTING option
+
 ADD_PROJECT_DEPENDENCY(pinocchio REQUIRED)
 ADD_PROJECT_DEPENDENCY(assimp REQUIRED)
 ADD_PROJECT_DEPENDENCY(fmt 10.0 REQUIRED)
@@ -92,4 +99,4 @@ endif(BUILD_PYTHON_INTERFACE)
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
-endif(BUILD_TESTING)
+endif()

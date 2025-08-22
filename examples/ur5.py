@@ -37,7 +37,7 @@ frame_ids = [frame_id0, frame_id1]
 for t in range(0, T + 1):
     q, v = qs[t], vs[t]
     pin.forwardKinematics(model, rr.data, q, v)
-    rr.display()
+    rr.display(q)
     rr.drawFrameVelocities(frame_ids)
 
 rr.play(list(qs), dt)
