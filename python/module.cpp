@@ -52,6 +52,12 @@ PYMODULE() {
       .def(pinocchio::python::VisualizerPythonVisitor<RerunVisualizer>())
       .add_property("initialized", &RerunVisualizer::initialized)
       .add_property("recordingID", &RerunVisualizer::recordingID)
+      .def("setTimeSeconds", 
+           +[](RerunVisualizer& self, const std::string& timeline, double seconds) {
+             self.stream.set_time_seconds(timeline, seconds);
+           },
+           ("self"_a, "timeline"_a, "seconds"_a),
+           "Set timeline timestamp")
       .def("switchTimeline", &RerunVisualizer::switchTimeline,
            ("self"_a, "name"_a), "Switch Rerun timelines.")
       .def("disableTimeline", &RerunVisualizer::disableTimeline,
@@ -59,7 +65,7 @@ PYMODULE() {
       .def("drawFrameVelocities", &RerunVisualizer::drawFrameVelocities,
            ("self"_a, "frame_ids"_a))
       .def("drawManipulabilityEllipsoid", &RerunVisualizer::drawManipulabilityEllipsoid,
-           ("self"_a, "frame_id"_a, "q"_a, "scale"_a = 1.0),
+           ("self"_a, "frame_id"_a, "q"_a, "scale"_a = 1.0, "static_log"_a = false),
            "Draw manipulability ellipsoid for a given frame")
       .def(
           "play",

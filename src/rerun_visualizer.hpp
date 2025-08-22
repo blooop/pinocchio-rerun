@@ -33,7 +33,8 @@ public:
 
   void drawManipulabilityEllipsoid(FrameIndex frame_id, 
                                    const Eigen::VectorXd &q,
-                                   double scale = 1.0);
+                                   double scale = 1.0,
+                                   bool static_log = false);
 
   void play(const vector<ConstVectorRef> &qs, double dt) override {
     this->play(qs, dt, "trajectory");

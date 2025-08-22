@@ -65,7 +65,8 @@ void RerunVisualizer::drawFrameVelocities(const vector<FrameIndex> &frame_ids) {
 
 void RerunVisualizer::drawManipulabilityEllipsoid(FrameIndex frame_id,
                                                    const Eigen::VectorXd &q,
-                                                   double scale) {
+                                                   double scale,
+                                                   bool static_log) {
   // Update model with current configuration
   pinocchio::forwardKinematics(m_model.get(), *m_data, q);
   pinocchio::updateFramePlacement(m_model.get(), *m_data, frame_id);
@@ -150,7 +151,12 @@ void RerunVisualizer::drawManipulabilityEllipsoid(FrameIndex frame_id,
   // Log the ellipsoid
   std::string ellipsoid_path = m_prefix + "/manipulability_ellipsoid/" + 
                                m_model.get().frames[frame_id].name;
-  stream.log(ellipsoid_path, mesh);
+  
+  if (static_log) {
+    stream.log_static(ellipsoid_path, mesh);
+  } else {
+    stream.log(ellipsoid_path, mesh);
+  }
 }
 
 void RerunVisualizer::play(const vector<ConstVectorRef> &qs, double dt,
