@@ -58,6 +58,9 @@ PYMODULE() {
            ("self"_a, "name"_a), "Disable a Rerun timeline.")
       .def("drawFrameVelocities", &RerunVisualizer::drawFrameVelocities,
            ("self"_a, "frame_ids"_a))
+      .def("drawManipulabilityEllipsoid", &RerunVisualizer::drawManipulabilityEllipsoid,
+           ("self"_a, "frame_id"_a, "q"_a, "scale"_a = 1.0),
+           "Draw manipulability ellipsoid for a given frame")
       .def(
           "play",
           +[](RerunVisualizer &v, const vector<VectorRef> &qs, double dt,

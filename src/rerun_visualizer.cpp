@@ -2,6 +2,8 @@
 
 #include <pinocchio/algorithm/geometry.hpp>
 #include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/jacobian.hpp>
+#include <Eigen/SVD>
 
 namespace pinrerun {
 
@@ -59,6 +61,96 @@ void RerunVisualizer::drawFrameVelocities(const vector<FrameIndex> &frame_ids) {
              rerun::Arrows3D::from_vectors(std::move(frame_vels))
                  .with_origins(std::move(frame_pos))
                  .with_labels(std::move(labels)));
+}
+
+void RerunVisualizer::drawManipulabilityEllipsoid(FrameIndex frame_id,
+                                                   const Eigen::VectorXd &q,
+                                                   double scale) {
+  // Update model with current configuration
+  pinocchio::forwardKinematics(m_model.get(), *m_data, q);
+  pinocchio::updateFramePlacement(m_model.get(), *m_data, frame_id);
+  
+  // Compute Jacobian matrix
+  Eigen::MatrixXd J(6, m_model.get().nv);
+  pinocchio::computeFrameJacobian(m_model.get(), *m_data, q, frame_id,
+                                  pinocchio::LOCAL_WORLD_ALIGNED, J);
+  
+  // Extract linear velocity part (first 3 rows)
+  Eigen::MatrixXd J_lin = J.topRows(3);
+  
+  // Compute manipulability matrix A = J * J^T
+  Eigen::Matrix3d A = J_lin * J_lin.transpose();
+  
+  // Perform SVD to get ellipsoid parameters
+  Eigen::JacobiSVD<Eigen::Matrix3d> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
+  Eigen::Vector3d singular_values = svd.singularValues();
+  Eigen::Matrix3d U = svd.matrixU();
+  
+  // Ellipsoid radii are square roots of singular values
+  Eigen::Vector3d radii = singular_values.cwiseSqrt() * scale;
+  
+  // Get frame position
+  pinocchio::SE3 frame_pose = m_data->oMf[frame_id];
+  Eigen::Vector3f center = frame_pose.translation().cast<float>();
+  
+  // Convert rotation matrix to quaternion for rerun
+  Eigen::Quaternionf quat(U.cast<float>());
+  
+  // Create ellipsoid mesh points
+  const int num_points_theta = 20;
+  const int num_points_phi = 10;
+  std::vector<rerun::Position3D> vertices;
+  std::vector<std::array<uint32_t, 3>> indices;
+  
+  // Generate ellipsoid vertices
+  for (int i = 0; i <= num_points_phi; ++i) {
+    float phi = M_PI * float(i) / float(num_points_phi);
+    for (int j = 0; j < num_points_theta; ++j) {
+      float theta = 2.0f * M_PI * float(j) / float(num_points_theta);
+      
+      // Parametric ellipsoid equations
+      float x = radii(0) * sin(phi) * cos(theta);
+      float y = radii(1) * sin(phi) * sin(theta);
+      float z = radii(2) * cos(phi);
+      
+      // Rotate by ellipsoid orientation and translate to frame position
+      Eigen::Vector3f local_point(x, y, z);
+      Eigen::Vector3f world_point = U.cast<float>() * local_point + center;
+      
+      vertices.push_back(rerun::Position3D(world_point.x(), world_point.y(), world_point.z()));
+    }
+  }
+  
+  // Generate triangle indices for the ellipsoid surface
+  for (int i = 0; i < num_points_phi; ++i) {
+    for (int j = 0; j < num_points_theta; ++j) {
+      int curr = i * num_points_theta + j;
+      int next = i * num_points_theta + ((j + 1) % num_points_theta);
+      int curr_next_row = (i + 1) * num_points_theta + j;
+      int next_next_row = (i + 1) * num_points_theta + ((j + 1) % num_points_theta);
+      
+      if (i < num_points_phi) {
+        // First triangle
+        indices.push_back({static_cast<uint32_t>(curr), 
+                          static_cast<uint32_t>(next), 
+                          static_cast<uint32_t>(curr_next_row)});
+        // Second triangle
+        indices.push_back({static_cast<uint32_t>(next), 
+                          static_cast<uint32_t>(next_next_row), 
+                          static_cast<uint32_t>(curr_next_row)});
+      }
+    }
+  }
+  
+  // Create rerun mesh
+  auto mesh = rerun::Mesh3D(std::move(vertices))
+                .with_triangle_indices(std::move(indices))
+                .with_albedo_factor(rerun::Rgba32(255, 100, 100, 64)); // More translucent red
+  
+  // Log the ellipsoid
+  std::string ellipsoid_path = m_prefix + "/manipulability_ellipsoid/" + 
+                               m_model.get().frames[frame_id].name;
+  stream.log(ellipsoid_path, mesh);
 }
 
 void RerunVisualizer::play(const vector<ConstVectorRef> &qs, double dt,
