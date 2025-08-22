@@ -66,6 +66,10 @@ depends-on = ["install"]
 cmd = "python examples/ur5.py"
 depends-on = ["install"]
 
+[tasks.example-manipulability]
+cmd = "python examples/manipulability_ellipsoid.py"
+depends-on = ["install"]
+
 [tasks.clean]
 cmd = "rm -rf build"
 
