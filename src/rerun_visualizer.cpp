@@ -143,19 +143,68 @@ void RerunVisualizer::drawManipulabilityEllipsoid(FrameIndex frame_id,
     }
   }
   
-  // Create rerun mesh
-  auto mesh = rerun::Mesh3D(std::move(vertices))
-                .with_triangle_indices(std::move(indices))
-                .with_albedo_factor(rerun::Rgba32(255, 100, 100, 64)); // More translucent red
+  // Create wireframe ellipsoid using LineStrips instead of filled mesh
+  std::vector<rerun::LineStrip3D> wireframe_strips;
   
-  // Log the ellipsoid
-  std::string ellipsoid_path = m_prefix + "/manipulability_ellipsoid/" + 
-                               m_model.get().frames[frame_id].name;
+  // Create horizontal circular wireframe strips
+  for (int i = 0; i <= num_points_phi; i += 2) {  // Every other phi level for cleaner wireframe
+    float phi = M_PI * float(i) / float(num_points_phi);
+    std::vector<rerun::Vec3D> strip_points;
+    
+    for (int j = 0; j <= num_points_theta; ++j) {
+      float theta = 2.0f * M_PI * float(j % num_points_theta) / float(num_points_theta);
+      
+      // Parametric ellipsoid equations
+      float x = radii(0) * sin(phi) * cos(theta);
+      float y = radii(1) * sin(phi) * sin(theta);
+      float z = radii(2) * cos(phi);
+      
+      // Rotate by ellipsoid orientation and translate to frame position
+      Eigen::Vector3f local_point(x, y, z);
+      Eigen::Vector3f world_point = U.cast<float>() * local_point + center;
+      
+      strip_points.push_back(rerun::Vec3D(world_point.x(), world_point.y(), world_point.z()));
+    }
+    wireframe_strips.push_back(rerun::LineStrip3D(strip_points));
+  }
   
+  // Create vertical meridian wireframe strips
+  for (int j = 0; j < num_points_theta; j += 3) {  // Every 3rd theta for cleaner wireframe
+    float theta = 2.0f * M_PI * float(j) / float(num_points_theta);
+    std::vector<rerun::Vec3D> strip_points;
+    
+    for (int i = 0; i <= num_points_phi; ++i) {
+      float phi = M_PI * float(i) / float(num_points_phi);
+      
+      // Parametric ellipsoid equations
+      float x = radii(0) * sin(phi) * cos(theta);
+      float y = radii(1) * sin(phi) * sin(theta);
+      float z = radii(2) * cos(phi);
+      
+      // Rotate by ellipsoid orientation and translate to frame position
+      Eigen::Vector3f local_point(x, y, z);
+      Eigen::Vector3f world_point = U.cast<float>() * local_point + center;
+      
+      strip_points.push_back(rerun::Vec3D(world_point.x(), world_point.y(), world_point.z()));
+    }
+    wireframe_strips.push_back(rerun::LineStrip3D(strip_points));
+  }
+  
+  // Create wireframe with red color
+  auto wireframe = rerun::LineStrips3D(wireframe_strips)
+                     .with_colors(rerun::Rgba32(255, 100, 100, 180)); // Semi-transparent red wireframe
+  
+  // Log the wireframe ellipsoid
+  std::string ellipsoid_path;
   if (static_log) {
-    stream.log_static(ellipsoid_path, mesh);
+    ellipsoid_path = m_prefix + "/manipulability_ellipsoid/" + 
+                     m_model.get().frames[frame_id].name + "_" + 
+                     std::to_string(m_ellipsoid_counter++);
+    stream.log_static(ellipsoid_path, wireframe);
   } else {
-    stream.log(ellipsoid_path, mesh);
+    ellipsoid_path = m_prefix + "/manipulability_ellipsoid/" + 
+                     m_model.get().frames[frame_id].name;
+    stream.log(ellipsoid_path, wireframe);
   }
 }
 

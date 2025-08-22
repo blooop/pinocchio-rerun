@@ -61,6 +61,7 @@ protected:
   std::string m_prefix;
   bool m_initialized;
   std::string m_recordingID;
+  mutable int m_ellipsoid_counter = 0;
 };
 
 } // namespace pinrerun

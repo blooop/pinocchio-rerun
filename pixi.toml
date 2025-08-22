@@ -70,8 +70,8 @@ depends-on = ["install"]
 cmd = "python examples/manipulability_ellipsoid.py"
 depends-on = ["install"]
 
-[tasks.example-manipulability-trail]
-cmd = "python examples/manipulability_trail.py"
+[tasks.example-manipulability-animation]
+cmd = "python examples/manipulability_animation.py"
 depends-on = ["install"]
 
 [tasks.clean]
