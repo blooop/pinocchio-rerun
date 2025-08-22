@@ -10,6 +10,7 @@ python = "3.11.*"
 cmake = ">=3.26"
 ninja = "*"
 compilers = "*"
+ccache = "*"
 pinocchio = "*"
 assimp = "*"
 eigenpy = "*"
@@ -25,7 +26,7 @@ ruff = "*"
 rerun-sdk = ">=0.23,<0.24"
 
 [tasks.configure]
-cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -G Ninja"
+cmd = "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -G Ninja"
 inputs = ["CMakeLists.txt"]
 outputs = ["build/CMakeCache.txt"]
 
@@ -36,8 +37,10 @@ inputs = ["CMakeLists.txt", "src/**/*.cpp", "src/**/*.hpp", "include/**/*.hpp", 
 outputs = ["build/**/*"]
 
 [tasks.install]
-cmd = "cmake --build build -j && (test build/install.stamp -nt build/CMakeCache.txt || (cmake --install build && date > build/install.stamp))"
-depends-on = ["configure"]
+cmd = "cmake --install build"
+depends-on = ["build"]
+inputs = ["build/lib/**/*", "build/python/**/*"]
+outputs = [".pixi/envs/default/lib/libpinocchio_rerun.so", ".pixi/envs/default/lib/python3.11/site-packages/pinocchio_rerun/**/*"]
 
 [tasks.test]
 cmd = "ctest --test-dir build --output-on-failure"
