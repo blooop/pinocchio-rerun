@@ -97,114 +97,28 @@ void RerunVisualizer::drawManipulabilityEllipsoid(FrameIndex frame_id,
   // Convert rotation matrix to quaternion for rerun
   Eigen::Quaternionf quat(U.cast<float>());
   
-  // Create ellipsoid mesh points
-  const int num_points_theta = 20;
-  const int num_points_phi = 10;
-  std::vector<rerun::Position3D> vertices;
-  std::vector<std::array<uint32_t, 3>> indices;
+  // Create a proper Rerun ellipsoid  
+  rerun::datatypes::Quaternion quat_data;
+  quat_data.xyzw = {{quat.x(), quat.y(), quat.z(), quat.w()}};
+  rerun::components::PoseRotationQuat rotation_quat(quat_data);
   
-  // Generate ellipsoid vertices
-  for (int i = 0; i <= num_points_phi; ++i) {
-    float phi = M_PI * float(i) / float(num_points_phi);
-    for (int j = 0; j < num_points_theta; ++j) {
-      float theta = 2.0f * M_PI * float(j) / float(num_points_theta);
-      
-      // Parametric ellipsoid equations
-      float x = radii(0) * sin(phi) * cos(theta);
-      float y = radii(1) * sin(phi) * sin(theta);
-      float z = radii(2) * cos(phi);
-      
-      // Rotate by ellipsoid orientation and translate to frame position
-      Eigen::Vector3f local_point(x, y, z);
-      Eigen::Vector3f world_point = U.cast<float>() * local_point + center;
-      
-      vertices.push_back(rerun::Position3D(world_point.x(), world_point.y(), world_point.z()));
-    }
-  }
+  auto ellipsoid = rerun::Ellipsoids3D::from_centers_and_half_sizes(
+      std::vector<rerun::Vec3D>{{static_cast<float>(center.x()), static_cast<float>(center.y()), static_cast<float>(center.z())}},
+      std::vector<rerun::Vec3D>{{static_cast<float>(radii(0)), static_cast<float>(radii(1)), static_cast<float>(radii(2))}})
+      .with_quaternions({rotation_quat})
+      .with_colors(rerun::Rgba32(255, 100, 100, 120)); // Semi-transparent red
   
-  // Generate triangle indices for the ellipsoid surface
-  for (int i = 0; i < num_points_phi; ++i) {
-    for (int j = 0; j < num_points_theta; ++j) {
-      int curr = i * num_points_theta + j;
-      int next = i * num_points_theta + ((j + 1) % num_points_theta);
-      int curr_next_row = (i + 1) * num_points_theta + j;
-      int next_next_row = (i + 1) * num_points_theta + ((j + 1) % num_points_theta);
-      
-      if (i < num_points_phi) {
-        // First triangle
-        indices.push_back({static_cast<uint32_t>(curr), 
-                          static_cast<uint32_t>(next), 
-                          static_cast<uint32_t>(curr_next_row)});
-        // Second triangle
-        indices.push_back({static_cast<uint32_t>(next), 
-                          static_cast<uint32_t>(next_next_row), 
-                          static_cast<uint32_t>(curr_next_row)});
-      }
-    }
-  }
-  
-  // Create wireframe ellipsoid using LineStrips instead of filled mesh
-  std::vector<rerun::LineStrip3D> wireframe_strips;
-  
-  // Create horizontal circular wireframe strips
-  for (int i = 0; i <= num_points_phi; i += 2) {  // Every other phi level for cleaner wireframe
-    float phi = M_PI * float(i) / float(num_points_phi);
-    std::vector<rerun::Vec3D> strip_points;
-    
-    for (int j = 0; j <= num_points_theta; ++j) {
-      float theta = 2.0f * M_PI * float(j % num_points_theta) / float(num_points_theta);
-      
-      // Parametric ellipsoid equations
-      float x = radii(0) * sin(phi) * cos(theta);
-      float y = radii(1) * sin(phi) * sin(theta);
-      float z = radii(2) * cos(phi);
-      
-      // Rotate by ellipsoid orientation and translate to frame position
-      Eigen::Vector3f local_point(x, y, z);
-      Eigen::Vector3f world_point = U.cast<float>() * local_point + center;
-      
-      strip_points.push_back(rerun::Vec3D(world_point.x(), world_point.y(), world_point.z()));
-    }
-    wireframe_strips.push_back(rerun::LineStrip3D(strip_points));
-  }
-  
-  // Create vertical meridian wireframe strips
-  for (int j = 0; j < num_points_theta; j += 3) {  // Every 3rd theta for cleaner wireframe
-    float theta = 2.0f * M_PI * float(j) / float(num_points_theta);
-    std::vector<rerun::Vec3D> strip_points;
-    
-    for (int i = 0; i <= num_points_phi; ++i) {
-      float phi = M_PI * float(i) / float(num_points_phi);
-      
-      // Parametric ellipsoid equations
-      float x = radii(0) * sin(phi) * cos(theta);
-      float y = radii(1) * sin(phi) * sin(theta);
-      float z = radii(2) * cos(phi);
-      
-      // Rotate by ellipsoid orientation and translate to frame position
-      Eigen::Vector3f local_point(x, y, z);
-      Eigen::Vector3f world_point = U.cast<float>() * local_point + center;
-      
-      strip_points.push_back(rerun::Vec3D(world_point.x(), world_point.y(), world_point.z()));
-    }
-    wireframe_strips.push_back(rerun::LineStrip3D(strip_points));
-  }
-  
-  // Create wireframe with red color
-  auto wireframe = rerun::LineStrips3D(wireframe_strips)
-                     .with_colors(rerun::Rgba32(255, 100, 100, 180)); // Semi-transparent red wireframe
-  
-  // Log the wireframe ellipsoid
+  // Log the ellipsoid
   std::string ellipsoid_path;
   if (static_log) {
     ellipsoid_path = m_prefix + "/manipulability_ellipsoid/" + 
                      m_model.get().frames[frame_id].name + "_" + 
                      std::to_string(m_ellipsoid_counter++);
-    stream.log_static(ellipsoid_path, wireframe);
+    stream.log_static(ellipsoid_path, ellipsoid);
   } else {
     ellipsoid_path = m_prefix + "/manipulability_ellipsoid/" + 
                      m_model.get().frames[frame_id].name;
-    stream.log(ellipsoid_path, wireframe);
+    stream.log(ellipsoid_path, ellipsoid);
   }
 }
 

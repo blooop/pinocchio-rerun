@@ -17,6 +17,7 @@ rr.loadViewerModel()
 # Get end-effector frame
 frame_id = model.getFrameId("tool0")
 
+
 # Define key poses for the robot arm to move through
 key_poses = [
     np.array([0.0, -1.2, 1.5, -1.8, -1.5, 0.0]),     # Home position
@@ -56,7 +57,7 @@ dt = total_duration / len(trajectory)
 
 print(f"Generated smooth trajectory with {len(trajectory)} points over {total_duration}s")
 
-# Animate robot and ellipsoid together for every single step
+# Animate robot and ellipsoid transforms only
 print("Recording robot and ellipsoid animation...")
 
 for step, q in enumerate(trajectory):
@@ -65,17 +66,16 @@ for step, q in enumerate(trajectory):
     # Set timeline for this frame
     rr.setTimeSeconds("animation", current_time)
     
-    # Display robot 
+    # Update forward kinematics and display robot
+    pin.forwardKinematics(model, rr.data, q)
     rr.display(q)
-    
-    # Draw manipulability ellipsoid at every single trajectory step
     rr.drawManipulabilityEllipsoid(frame_id, q, scale=0.08, static_log=False)
     
     if step % 50 == 0:  # Print progress
         print(f"Frame {step}/{len(trajectory)} at t={current_time:.2f}s")
 
-print(f"\nAnimation complete!")
+print("\nAnimation complete!")
 print(f"- Robot animation: {len(trajectory)} poses over {total_duration:.1f} seconds")
-print(f"- Manipulability ellipsoid animated at every trajectory step")
-print(f"- Use timeline scrubber to see how manipulability changes in real-time")
-print(f"- The ellipsoid shows velocity manipulability - size and shape indicate capability")
+print("- Manipulability ellipsoid animated at every trajectory step")
+print("- Use timeline scrubber to see how manipulability changes in real-time")
+print("- The ellipsoid shows velocity manipulability - size and shape indicate capability")
