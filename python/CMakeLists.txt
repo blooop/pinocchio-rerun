@@ -34,7 +34,7 @@ add_custom_command(
 
 install(TARGETS ${PYLIB} DESTINATION ${PYLIB_INSTALL_DIR})
 
-PYTHON_INSTALL_ON_SITE(${LIB_NAME} pinocchio_rerun/__init__.py)
+PYTHON_INSTALL_ON_SITE(${LIB_NAME} __init__.py)
 
 # Generate stubs
 
